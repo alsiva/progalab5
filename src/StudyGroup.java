@@ -1,3 +1,5 @@
+import java.util.Date;
+
 public class StudyGroup implements Comparable<StudyGroup> {
     private Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
@@ -20,6 +22,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.name = name;
     }
 
+    public String getName() { return this.name; }
+
     public void setCoordinates(float x, int y) {
         this.coordinates = new Coordinates(x, y);
     }
@@ -31,6 +35,8 @@ public class StudyGroup implements Comparable<StudyGroup> {
     public void setStudentsCount(int count) {
         this.studentsCount = count;
     }
+
+    public Integer getStudentsCount() { return this.studentsCount; }
 
     public void setFormOfEducation(FormOfEducation foe) {
         this.formOfEducation = foe;
@@ -44,8 +50,40 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.groupAdmin = new Person(name, birthday, passportID, location);
     }
 
-    public int compareTo(StudyGroup studyGroup) {
-        return id.compareTo(studyGroup.getId());
+    public Coordinates getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(Coordinates coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setStudentsCount(Integer studentsCount) {
+        this.studentsCount = studentsCount;
+    }
+
+    public FormOfEducation getFormOfEducation() {
+        return formOfEducation;
+    }
+
+    public Semester getSemesterEnum() {
+        return semesterEnum;
+    }
+
+    public void setGroupAdmin(Person groupAdmin) {
+        this.groupAdmin = groupAdmin;
+    }
+
+    public Person getGroupAdmin() {
+        return this.groupAdmin;
+    }
+
+    public int compareTo(StudyGroup other) {
+        return studentsCount.compareTo(other.studentsCount);
     }
 }
 
