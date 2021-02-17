@@ -3,19 +3,28 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Application {
+    private static final BufferedReader stdinReader = new BufferedReader(new InputStreamReader(System.in));
+
     public static void main(String[] args) throws IOException {
         Set<StudyGroup> set = new LinkedHashSet<>();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
+        // read original data from source file
+
+
+        CommandManager commandManager = new CommandManager(set);
 
         String command;
         do {
             System.out.println("Введите комманду");
-            command = reader.readLine();
+            command = stdinReader.readLine();
 
             if (command.equals("help")) {
                 throw new NotImplementedException();
@@ -54,6 +63,9 @@ public class Application {
                 String fileName = command.substring("execute_script".length()).trim();
                 System.out.println("todo: execute script wit file name " + fileName);
             } else if (command.startsWith("add_if_min ")) {
+                StudyGroup newGroup = readStudyGroupFromStdin();
+                commandManager.addIfMin(newGroup);
+
                 throw new NotImplementedException();
             } else if (command.startsWith("remove_lower")) {
                 throw new NotImplementedException();
@@ -70,5 +82,49 @@ public class Application {
             }
         } while (!command.equals("exit"));
 
+    }
+
+    private static StudyGroup readStudyGroupFromStdin() throws IOException, ParseException {
+        StudyGroup studyGroup = new StudyGroup();
+
+        System.out.println("Please enter id:");
+        String id = stdinReader.readLine();
+        System.out.println("Please enter name:");
+        String name = stdinReader.readLine();
+        System.out.println("Please enter coordinate x:");
+        String x = stdinReader.readLine();
+        System.out.println("Please enter coordinate y:");
+        String y = stdinReader.readLine();
+        System.out.println("Please enter creation date:");
+        String creationDate = stdinReader.readLine();
+        System.out.println("Please enter students amount:");
+        String studentsCount = stdinReader.readLine();
+        System.out.println("Please enter form of education:");
+        String formOfEducation = stdinReader.readLine();
+        System.out.println("Please enter semester:");
+        String semesterEnum = stdinReader.readLine();
+        System.out.println("Please enter admin name:");
+        String adminName = stdinReader.readLine();
+        System.out.println("Please enter admin birthday:");
+        String adminBirthday = stdinReader.readLine();
+        System.out.println("Please enter admin passport ID");
+        String passportId = stdinReader.readLine();
+        System.out.println("Please enter admin coordinate x");
+        String locationX = stdinReader.readLine();
+        System.out.println("Please enter admin coordinate y");
+        String locationY = stdinReader.readLine();
+        System.out.println("Please enter admin location name");
+        String locationName = stdinReader.readLine();
+
+        studyGroup.setId(Long.parseLong(id));
+        studyGroup.setName(name);
+        studyGroup.setCoordinates(Float.parseFloat(x), Integer.parseInt(y));
+        studyGroup.setCreationDate(new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").parse(creationDate));
+        studyGroup.setStudentsCount(Integer.parseInt(studentsCount));
+        studyGroup.setFormOfEducation(FormOfEducation.valueOf(formOfEducation));
+        studyGroup.setSemesterEnum(Semester.valueOf(semesterEnum));
+        studyGroup.setGroupAdmin(adminName, LocalDateTime.parse(adminBirthday,DateTimeFormatter.ISO_DATE_TIME), passportId, new Location(Integer.parseInt(locationX), Integer.parseInt(locationY), locationName));
+
+        return studyGroup;
     }
 }
