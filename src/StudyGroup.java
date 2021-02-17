@@ -10,6 +10,26 @@ public class StudyGroup implements Comparable<StudyGroup> {
     private Semester semesterEnum; //Поле не может быть null
     private Person groupAdmin; //Поле может быть null
 
+    public StudyGroup(
+            Long id,
+            String name,
+            Coordinates coordinates,
+            Date creationDate,
+            Integer studentsCount,
+            FormOfEducation formOfEducation,
+            Semester semesterEnum,
+            Person groupAdmin
+    ) {
+        this.id = id;
+        this.name = name;
+        this.coordinates = coordinates;
+        this.creationDate = creationDate;
+        this.studentsCount = studentsCount;
+        this.formOfEducation = formOfEducation;
+        this.semesterEnum = semesterEnum;
+        this.groupAdmin = groupAdmin;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }

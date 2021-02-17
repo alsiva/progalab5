@@ -1,14 +1,14 @@
 public class Location {
 
-    public Location(int x, Integer y, String name) {
+    public Location(int x, Integer y, String locationName) {
         this.x=x;
         this.y=y;
-        this.name=name;
+        this.locationName = locationName;
     }
 
     private int x;
     private Integer y; //Поле не может быть null
-    private String name; //Поле не может быть null
+    private String locationName; //Поле не может быть null
 
     public int getX() {
         return x;
@@ -26,11 +26,11 @@ public class Location {
         this.y = y;
     }
 
-    public String getName() {
-        return name;
+    public String getLocationName() {
+        return locationName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 }

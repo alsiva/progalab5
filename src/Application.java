@@ -1,5 +1,3 @@
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,10 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class Application {
     private static final BufferedReader stdinReader = new BufferedReader(new InputStreamReader(System.in));
@@ -21,6 +18,7 @@ public class Application {
 
         // read original data from source file
 
+        set.stream().filter(studyGroup -> studyGroup.getStudentsCount() > 8).collect(Collectors.toList())
 
         CommandManager commandManager = new CommandManager(set);
 
@@ -82,38 +80,43 @@ public class Application {
 
     }
 
+    private static boolean isNameValid(String name) {
+        return !name.isEmpty();
+    }
+
     private static StudyGroup readStudyGroupFromStdin() throws IOException, ParseException {
         StudyGroup studyGroup = new StudyGroup();
 
-        System.out.println("Please enter id:");
-        String id = stdinReader.readLine();
-        System.out.println("Please enter name:");
-        String name = stdinReader.readLine();
-        System.out.println("Please enter coordinate x:");
-        String x = stdinReader.readLine();
-        System.out.println("Please enter coordinate y:");
-        String y = stdinReader.readLine();
-        System.out.println("Please enter creation date:");
-        String creationDate = stdinReader.readLine();
-        System.out.println("Please enter students amount:");
-        String studentsCount = stdinReader.readLine();
-        System.out.println("Please enter form of education:");
-        String formOfEducation = stdinReader.readLine();
+        String id = UUID.randomUUID().toString();
+
+        String name = readField("name", field -> !field.isEmpty());
+
+        int x = readField("coordinate x", Integer::parseInt, field -> field > -318);
+        float y = readField("coordinate y", Float::parseFloat, field -> field <= 870);
+        Date creationDate = new Date(); // creation date is now
+        int studentsCount = readField("students count", Integer::parseInt, field -> field > 0);
+
+        FormOfEducation formOfEducation = readField("education", FormOfEducation::valueOf, Objects::nonNull);
         System.out.println("Please enter semester:");
         String semesterEnum = stdinReader.readLine();
-        System.out.println("Please enter admin name:");
-        String adminName = stdinReader.readLine();
+
+        String adminName = readField("adminName", field -> !field.isEmpty());
+
         System.out.println("Please enter admin birthday:");
         String adminBirthday = stdinReader.readLine();
-        System.out.println("Please enter admin passport ID");
-        String passportId = stdinReader.readLine();
-        System.out.println("Please enter admin coordinate x");
-        String locationX = stdinReader.readLine();
-        System.out.println("Please enter admin coordinate y");
-        String locationY = stdinReader.readLine();
-        System.out.println("Please enter admin location name");
-        String locationName = stdinReader.readLine();
 
+        String passportId = readField("passportID", field -> field.length() > 7);
+        System.out.println("Please enter admin coordinate x");
+        int locationX = readField("location x", Integer::parseInt, field -> true);// уточнить
+        System.out.println("Please enter admin coordinate y");
+        int locationY = readField("location y", Integer::parseInt, Objects::nonNull);//уточнить
+
+        String locationName = readField("locationName", field -> !field.isEmpty());
+
+//        return new StudyGroup(
+//                id,
+//                name,
+//        )
         studyGroup.setId(Long.parseLong(id));
         studyGroup.setName(name);
         studyGroup.setCoordinates(Float.parseFloat(x), Integer.parseInt(y));
@@ -125,4 +128,35 @@ public class Application {
 
         return studyGroup;
     }
+
+    private static String readName() throws IOException {
+        String name;
+
+
+
+        do {
+            System.out.println("Please enter name:");
+            name = stdinReader.readLine().trim();
+        } while (name.isEmpty());
+
+
+        return name;
+    }
+
+    private static <T> T readField(String fieldName, Parser<T> parser, Predicate<T> isValid) throws IOException {
+        T field;
+
+        do {
+            System.out.println("Please enter " + fieldName + ":");
+            String fieldAsStr = stdinReader.readLine().trim();
+            field = parser.parse(fieldAsStr);
+        } while (!isValid.test(field));
+
+        return field;
+    }
+
+    private static String readField(String fieldName, Predicate<String> isValid) throws IOException {
+        return readField(fieldName, str -> str, isValid);
+    }
+
 }

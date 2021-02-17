@@ -97,7 +97,7 @@ public class CommandManager {
                 Integer yL = location.getY();
                 line[13] = yL.toString();
 
-                String locName = location.getName();
+                String locName = location.getLocationName();
                 line[14] = locName;
 
                 writer.writeNext(line);
