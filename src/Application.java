@@ -8,12 +8,15 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 
 public class Application {
     private static final BufferedReader stdinReader = new BufferedReader(new InputStreamReader(System.in));
+    private static final Queue<String> lastCommands = new LinkedList<>();
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         Set<StudyGroup> set = new LinkedHashSet<>();
 
         // read original data from source file
@@ -27,24 +30,15 @@ public class Application {
             command = stdinReader.readLine();
 
             if (command.equals("help")) {
-                throw new NotImplementedException();
+                commandManager.help();
             } else if (command.equals("info")) {
-                throw new NotImplementedException();
+                commandManager.info();
             } else if (command.equals("show")) {
-                throw new NotImplementedException();
+                commandManager.show();
             } else if (command.startsWith("add")) {
-                throw new NotImplementedException();
+                commandManager.add(readStudyGroupFromStdin());
             } else if (command.startsWith("update id")) {
-                String idAsStr = command.substring("update id".length()).trim();
-                long id;
-                try {
-                    id = Long.parseLong(idAsStr);
-                } catch (NumberFormatException e) {
-                    System.err.println("Illegal argument for update id: " + idAsStr + " is not a long");
-                    continue;
-                }
-
-                System.out.println("todo: update id " + id);
+                commandManager.updateId(readStudyGroupFromStdin());
             } else if (command.startsWith("remove_by_id")) {
                 String idAsStr = command.substring("remove_by_id".length()).trim();
                 long id;
@@ -54,23 +48,22 @@ public class Application {
                     System.err.println("Illegal argument for remove_by_id: " + idAsStr + " is not a long");
                     continue;
                 }
-                System.out.println("todo: remove_by_id " + id);
+                commandManager.removeById(id);
             } else if (command.equals("clear")) {
-                throw new NotImplementedException();
+                commandManager.clear();
             } else if (command.equals("save")) {
-                throw new NotImplementedException();
+                commandManager.save();
             } else if (command.startsWith("execute_script")) {
                 String fileName = command.substring("execute_script".length()).trim();
                 System.out.println("todo: execute script wit file name " + fileName);
             } else if (command.startsWith("add_if_min ")) {
-                StudyGroup newGroup = readStudyGroupFromStdin();
-                commandManager.addIfMin(newGroup);
-
-                throw new NotImplementedException();
+                commandManager.addIfMin(readStudyGroupFromStdin());
             } else if (command.startsWith("remove_lower")) {
-                throw new NotImplementedException();
+                commandManager.removeLower(readStudyGroupFromStdin());
             } else if (command.equals("history")) {
-                throw new NotImplementedException();
+                for (String lastCommand : lastCommands) {
+                    System.out.println(lastCommand);
+                }
             } else if (command.startsWith("remove_all_by_students_count ")) {
                 String countAsStr = command.substring("remove_all_by_students_count ".length()).trim();
                 long count;
@@ -79,6 +72,11 @@ public class Application {
                 } catch (NumberFormatException e) {
                     System.err.println("Illegal argument for remove_all_by_students_count: " + countAsStr + " is not long");
                 }
+            }
+
+            lastCommands.add(command);
+            if (lastCommands.size() > 10) {
+                lastCommands.remove();
             }
         } while (!command.equals("exit"));
 

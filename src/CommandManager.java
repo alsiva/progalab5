@@ -2,10 +2,12 @@ import com.opencsv.CSVWriter;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.time.Instant;
 import java.util.Set;
 
 public class CommandManager {
     private final Set<StudyGroup> set;
+    private final Instant creationDate = Instant.now();
 
     public CommandManager(Set<StudyGroup> set) {
         this.set = set;
@@ -13,6 +15,12 @@ public class CommandManager {
 
     public void add(StudyGroup studyGroup) {
         set.add(studyGroup);
+    }
+
+    public void info() {
+        System.out.println("Collection type: " + set.getClass().toString());
+        System.out.println("Collection creation time: " + creationDate.toString());
+        System.out.println("Elements in collection: " + set.size());
     }
 
     public void show() {
@@ -25,10 +33,10 @@ public class CommandManager {
         System.out.println(HELP_CONTENTS);
     }
 
-    public void updateId(Long id) {
+    public void updateId(StudyGroup other) {
         for (StudyGroup studyGroup: set) {
-            if (studyGroup.getId().equals(id)) {
-                studyGroup.setId(id);
+            if (studyGroup.getId().equals(other.getId())) {
+                studyGroup = other;
             }
         }
     }
@@ -59,38 +67,38 @@ public class CommandManager {
 
                 java.util.Date creationDate = studyGroup.getCreationDate();
                 String creationDateAsStr = creationDate.toString();
-                line += creationDateAsStr + ",";
+                line[4] = creationDateAsStr;
 
                 Integer studentsCount = studyGroup.getStudentsCount();
-                line += studentsCount.toString() + ",";
+                line[5] = studentsCount.toString();
 
                 FormOfEducation formOfEducation = studyGroup.getFormOfEducation();
-                line += formOfEducation.toString() + ",";
+                line[6] = formOfEducation.toString();
 
                 Semester semester = studyGroup.getSemesterEnum();
-                line += semester.toString() + ",";
+                line[7] = semester.toString();
 
                 Person admin = studyGroup.getGroupAdmin();
                 String adminName = admin.getName();
-                line += adminName + ",";
+                line[8] = adminName;
 
                 java.time.LocalDateTime birthday = admin.getBirthday();
-                line += birthday.toString();
+                line[9] = birthday.toString();
 
                 String passportID = admin.getPassportID();
-                line += passportID + ",";
+                line[10] = passportID;
 
                 Location location = admin.getLocation();
-                line += location.toString();
+                line[11] = location.toString();
 
                 Integer xL = location.getX();
-                line += xL.toString() + ",";
+                line[12] = xL.toString();
 
                 Integer yL = location.getY();
-                line += yL.toString();
+                line[13] = yL.toString();
 
                 String locName = location.getName();
-                line += locName + ",";
+                line[14] = locName;
 
                 writer.writeNext(line);
             }
@@ -124,10 +132,6 @@ public class CommandManager {
         }
     }
 
-    public void history() {
-        //TODO history решил отложить
-    }
-
     public void removeAllByStudentsCount(Integer count) {
         set.removeIf(studyGroup -> studyGroup.getStudentsCount().equals(count));
     }
@@ -140,6 +144,14 @@ public class CommandManager {
             }
         }
         return count;
+    }
+
+    public void filterLessThanSemesterEnum(Semester semester) {
+        for (StudyGroup studyGroup: set) {
+            if (studyGroup.getSemesterEnum().ordinal() < semester.ordinal()) {
+                System.out.println(studyGroup);
+            }
+        }
     }
 
     private static String HELP_CONTENTS = "" +
