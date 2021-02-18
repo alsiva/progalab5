@@ -30,6 +30,11 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.groupAdmin = groupAdmin;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }

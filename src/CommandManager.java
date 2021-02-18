@@ -25,7 +25,7 @@ public class CommandManager {
 
     public void show() {
         for (StudyGroup studyGroup : set) {
-            System.out.println(studyGroup);
+            System.out.println(studyGroup.toString());
         }
     }
 
@@ -54,7 +54,7 @@ public class CommandManager {
             CSVWriter writer = new CSVWriter(new PrintWriter("students.csv"));
 
             for (StudyGroup studyGroup: set) {
-                String[] line = new String[14];
+                String[] line = new String[15];
 
                 line[0] = studyGroup.getId().toString();
                 line[1] = studyGroup.getName();
@@ -132,7 +132,7 @@ public class CommandManager {
         }
     }
 
-    public void removeAllByStudentsCount(Integer count) {
+    public void removeAllByStudentsCount(Long count) {
         set.removeIf(studyGroup -> studyGroup.getStudentsCount().equals(count));
     }
 

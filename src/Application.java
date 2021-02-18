@@ -1,24 +1,26 @@
+import com.opencsv.exceptions.CsvValidationException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class Application {
     private static final BufferedReader stdinReader = new BufferedReader(new InputStreamReader(System.in));
     private static final Queue<String> lastCommands = new LinkedList<>();
 
     public static void main(String[] args) throws IOException, ParseException {
-        Set<StudyGroup> set = new LinkedHashSet<>();
-
-        // read original data from source file
-
-        set.stream().filter(studyGroup -> studyGroup.getStudentsCount() > 8).collect(Collectors.toList())
+        Set<StudyGroup> set;
+        try {
+            set = ReadCSV.readCSV("source.csv");
+        } catch (CsvValidationException e) {
+            System.err.println("Failed to read file: " + e.getMessage());
+            return;
+        }
 
         CommandManager commandManager = new CommandManager(set);
 
@@ -67,6 +69,7 @@ public class Application {
                 long count;
                 try {
                     count = Long.parseLong(countAsStr);
+                    commandManager.removeAllByStudentsCount(count);
                 } catch (NumberFormatException e) {
                     System.err.println("Illegal argument for remove_all_by_students_count: " + countAsStr + " is not long");
                 }
@@ -80,67 +83,40 @@ public class Application {
 
     }
 
-    private static boolean isNameValid(String name) {
-        return !name.isEmpty();
-    }
+    private static final DateTimeFormatter adminBirthdayFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    private static StudyGroup readStudyGroupFromStdin() throws IOException, ParseException {
-        StudyGroup studyGroup = new StudyGroup();
-
-        String id = UUID.randomUUID().toString();
-
+    private static final Random rng = new Random();
+    private static StudyGroup readStudyGroupFromStdin() throws IOException{
+        Long id = rng.nextLong();
         String name = readField("name", field -> !field.isEmpty());
-
-        int x = readField("coordinate x", Integer::parseInt, field -> field > -318);
-        float y = readField("coordinate y", Float::parseFloat, field -> field <= 870);
+        float x = readField("coordinate y", Float::parseFloat, field -> field <= 870);
+        int y = readField("coordinate x", Integer::parseInt, field -> field > -318);
         Date creationDate = new Date(); // creation date is now
         int studentsCount = readField("students count", Integer::parseInt, field -> field > 0);
-
         FormOfEducation formOfEducation = readField("education", FormOfEducation::valueOf, Objects::nonNull);
-        System.out.println("Please enter semester:");
-        String semesterEnum = stdinReader.readLine();
-
+        Semester semester = readField("semester", Semester::valueOf, Objects::nonNull);
         String adminName = readField("adminName", field -> !field.isEmpty());
-
-        System.out.println("Please enter admin birthday:");
-        String adminBirthday = stdinReader.readLine();
+        LocalDateTime adminBirthday = readField(
+                "admin birthday",
+                str -> LocalDateTime.parse(str, adminBirthdayFormatter),
+                Objects::nonNull
+        );
 
         String passportId = readField("passportID", field -> field.length() > 7);
-        System.out.println("Please enter admin coordinate x");
         int locationX = readField("location x", Integer::parseInt, field -> true);// уточнить
-        System.out.println("Please enter admin coordinate y");
         int locationY = readField("location y", Integer::parseInt, Objects::nonNull);//уточнить
-
         String locationName = readField("locationName", field -> !field.isEmpty());
 
-//        return new StudyGroup(
-//                id,
-//                name,
-//        )
-        studyGroup.setId(Long.parseLong(id));
-        studyGroup.setName(name);
-        studyGroup.setCoordinates(Float.parseFloat(x), Integer.parseInt(y));
-        studyGroup.setCreationDate(new SimpleDateFormat("dd-MM-yyyy hh:mm:ss").parse(creationDate));
-        studyGroup.setStudentsCount(Integer.parseInt(studentsCount));
-        studyGroup.setFormOfEducation(FormOfEducation.valueOf(formOfEducation));
-        studyGroup.setSemesterEnum(Semester.valueOf(semesterEnum));
-        studyGroup.setGroupAdmin(adminName, LocalDateTime.parse(adminBirthday,DateTimeFormatter.ISO_DATE_TIME), passportId, new Location(Integer.parseInt(locationX), Integer.parseInt(locationY), locationName));
-
-        return studyGroup;
-    }
-
-    private static String readName() throws IOException {
-        String name;
-
-
-
-        do {
-            System.out.println("Please enter name:");
-            name = stdinReader.readLine().trim();
-        } while (name.isEmpty());
-
-
-        return name;
+        return new StudyGroup(
+                id,
+                name,
+                new Coordinates(x,y),
+                creationDate,
+                studentsCount,
+                formOfEducation,
+                semester,
+                new Person(adminName, adminBirthday, passportId, new Location(locationX, locationY, locationName))
+        );
     }
 
     private static <T> T readField(String fieldName, Parser<T> parser, Predicate<T> isValid) throws IOException {
