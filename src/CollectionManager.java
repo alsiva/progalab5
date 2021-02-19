@@ -1,15 +1,11 @@
-import com.opencsv.CSVWriter;
-
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.Set;
 
-public class CommandManager {
+public class CollectionManager {
     private final Set<StudyGroup> set;
     private final Instant creationDate = Instant.now();
 
-    public CommandManager(Set<StudyGroup> set) {
+    public CollectionManager(Set<StudyGroup> set) {
         this.set = set;
     }
 
@@ -34,10 +30,10 @@ public class CommandManager {
     }
 
     public void updateId(StudyGroup other) {
-        for (StudyGroup studyGroup: set) {
-            if (studyGroup.getId().equals(other.getId())) {
-                studyGroup = other;
-            }
+        boolean wasRemoved = set.removeIf(studyGroup -> studyGroup.getId().equals(other.getId()));
+
+        if (wasRemoved) {
+            set.add(other);
         }
     }
 
@@ -49,64 +45,7 @@ public class CommandManager {
         set.clear();
     }
 
-    public void save() {
-        try {
-            CSVWriter writer = new CSVWriter(new PrintWriter("students.csv"));
 
-            for (StudyGroup studyGroup: set) {
-                String[] line = new String[15];
-
-                line[0] = studyGroup.getId().toString();
-                line[1] = studyGroup.getName();
-
-                Coordinates coordinates = studyGroup.getCoordinates();
-                float x = coordinates.getX();
-                int y = coordinates.getY();
-                line[2] = Float.toString(x);
-                line[3] = Integer.toString(y);
-
-                java.util.Date creationDate = studyGroup.getCreationDate();
-                String creationDateAsStr = creationDate.toString();
-                line[4] = creationDateAsStr;
-
-                Integer studentsCount = studyGroup.getStudentsCount();
-                line[5] = studentsCount.toString();
-
-                FormOfEducation formOfEducation = studyGroup.getFormOfEducation();
-                line[6] = formOfEducation.toString();
-
-                Semester semester = studyGroup.getSemesterEnum();
-                line[7] = semester.toString();
-
-                Person admin = studyGroup.getGroupAdmin();
-                String adminName = admin.getName();
-                line[8] = adminName;
-
-                java.time.LocalDateTime birthday = admin.getBirthday();
-                line[9] = birthday.toString();
-
-                String passportID = admin.getPassportID();
-                line[10] = passportID;
-
-                Location location = admin.getLocation();
-                line[11] = location.toString();
-
-                Integer xL = location.getX();
-                line[12] = xL.toString();
-
-                Integer yL = location.getY();
-                line[13] = yL.toString();
-
-                String locName = location.getLocationName();
-                line[14] = locName;
-
-                writer.writeNext(line);
-            }
-        } catch (FileNotFoundException e) {
-            System.err.println("Unable to save file");
-        }
-
-    }
 
     public void executeScript() {
         //TODO executeScript решил отложить
@@ -115,32 +54,29 @@ public class CommandManager {
     public void addIfMin(StudyGroup other) {
         StudyGroup min = null;
         for (StudyGroup studyGroup: set) {
-            if (min == null || min.getStudentsCount() < studyGroup.getStudentsCount()) {
+            if (min == null || studyGroup.getStudentsCount() < min.getStudentsCount()) {
                 min = studyGroup;
             }
         }
-        if (min.getStudentsCount() > other.getStudentsCount()) {
+
+        if (min == null || other.getStudentsCount() < min.getStudentsCount()) {
             set.add(other);
         }
     }
 
     public void removeLower(StudyGroup other) {
-        for (StudyGroup studyGroup: set) {
-            if (other.getStudentsCount() > studyGroup.getStudentsCount()) {
-                set.remove(studyGroup);
-            }
-        }
+        set.removeIf(studyGroup -> studyGroup.getStudentsCount() < other.getStudentsCount());
     }
 
-    public void removeAllByStudentsCount(Long count) {
-        set.removeIf(studyGroup -> studyGroup.getStudentsCount().equals(count));
+    public void removeAllByStudentsCount(long count) {
+        set.removeIf(studyGroup -> studyGroup.getStudentsCount() == count);
     }
 
     public Integer countByGroupAdmin(Person groupAdmin) {
         int count = 0;
         for (StudyGroup studyGroup: set) {
             if (studyGroup.getGroupAdmin().equals(groupAdmin)) {
-                count += 1;
+                count++;
             }
         }
         return count;
@@ -152,6 +88,15 @@ public class CommandManager {
                 System.out.println(studyGroup);
             }
         }
+    }
+
+    public boolean hasElementWithId(Long id) {
+        for (StudyGroup studyGroup: set) {
+            if (studyGroup.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String HELP_CONTENTS = "" +
