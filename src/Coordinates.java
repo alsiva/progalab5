@@ -1,13 +1,6 @@
 public class Coordinates {
     public Coordinates(float x, int y) {
-        if (x <= -318) {
-            throw new IllegalArgumentException(); // todo: message
-        }
         this.x = x;
-
-        if (y > 870) {
-            throw new IllegalArgumentException(); //todo: message
-        }
         this.y = y;
     }
 

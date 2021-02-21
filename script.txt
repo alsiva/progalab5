@@ -1,0 +1,25 @@
+show
+info
+add
+P3_SCRIPT
+3
+8
+45
+DISTANCE_EDUCATION
+FOURTH
+max
+1990-02-15
+4004515202
+500
+800
+Moscow
+add
+P3_WILL_BE_DELETED
+5
+10
+222
+DISTANCE_EDUCATION
+FOURTH
+
+remove_all_by_students_count 222
+history

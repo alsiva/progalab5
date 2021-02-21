@@ -4,7 +4,6 @@ import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -31,7 +30,7 @@ class FileStorage {
             Semester semester = Semester.valueOf(line[7]);
 
             String adminName = line[8];
-            LocalDate birthday = LocalDate.parse(line[9], Application.BIRTHDAY_FORMATTER);
+            LocalDate birthday = LocalDate.parse(line[9], CommandReader.BIRTHDAY_FORMATTER);
 
             String passportId = line[10];
 
@@ -92,7 +91,7 @@ class FileStorage {
                 String adminName = admin.getName();
                 line[8] = adminName;
 
-                line[9] = admin.getBirthday().format(Application.BIRTHDAY_FORMATTER);
+                line[9] = admin.getBirthday().format(CommandReader.BIRTHDAY_FORMATTER);
 
                 String passportID = admin.getPassportID();
                 line[10] = passportID;
