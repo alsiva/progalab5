@@ -3,20 +3,24 @@ import com.opencsv.exceptions.CsvValidationException;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Main application class
+ * @author Alex Ivanov
+ */
 public class Application {
     public static void main(String[] args) throws IOException {
-        // todo: read from args
+        if (args.length == 0) {
+            System.err.println("Please specify input file name as program argument");
+            return;
+        }
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter a file name: ");
-        System.out.flush();
-        String filename = scanner.nextLine();
+        String filename = args[0];
 
         Set<StudyGroup> set;
         try {
             set = FileStorage.readCSV(filename);
         } catch (FileNotFoundException e) {
-            System.err.println("File " + filename + " not found. Error: " + e.getMessage());
+            System.err.println("File " + filename + " not found (" + e.getMessage() + ")");
             return;
         } catch (IOException e) {
             System.err.println("Error while reading from file: " + e.getMessage());

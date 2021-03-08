@@ -1,5 +1,8 @@
 import java.util.Date;
 
+/**
+ * Class that defines study group
+ */
 public class StudyGroup implements Comparable<StudyGroup> {
     private final Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private final String name; //Поле не может быть null, Строка не может быть пустой
@@ -44,30 +47,56 @@ public class StudyGroup implements Comparable<StudyGroup> {
                 '}';
     }
 
+    /**
+     *
+     * @return id of group
+     */
     public Long getId() {
         return this.id;
     }
 
+    /**
+     * @return group name
+     */
     public String getName() { return this.name; }
 
+    /**
+     * @return amount of students in group
+     */
     public int getStudentsCount() { return this.studentsCount; }
 
+    /**
+     *
+     * @return coordinates that contains x and y
+     */
     public Coordinates getCoordinates() {
         return coordinates;
     }
 
+    /**
+     * @return creation date of study group
+     */
     public Date getCreationDate() {
         return creationDate;
     }
 
+    /**
+     * @return group form of education
+     */
     public FormOfEducation getFormOfEducation() {
         return formOfEducation;
     }
 
+    /**
+     * @return group semester
+     */
     public Semester getSemesterEnum() {
         return semesterEnum;
     }
 
+    /**
+     * @return group admin
+     */
     public Person getGroupAdmin() {
         return this.groupAdmin;
     }

@@ -4,6 +4,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
+/**
+ * reads commands from user or script
+ */
 public class CommandReader {
     private final Administration administration;
     private final BufferedReader in;
@@ -14,6 +17,10 @@ public class CommandReader {
         this.in = in;
     }
 
+    /**
+     * @throws IOException
+     * method that reads string commands from user or script
+     */
     public void readCommands() throws IOException {
         while(true) {
             System.out.println("Please enter command:");
@@ -134,10 +141,23 @@ public class CommandReader {
         }
     }
     private static final Random rng = new Random();
+
+    /**
+     * returns study group with random id
+     * @return study group with random id
+     * @throws IOException
+     */
     private StudyGroup readStudyGroup() throws IOException {
         long id = rng.nextLong(); // generate random id
         return readStudyGroup(id);
     }
+
+    /**
+     * returns study group with defined id
+     * @param id
+     * @return study group with defined id
+     * @throws IOException
+     */
     private StudyGroup readStudyGroup(long id) throws IOException {
         System.out.println("Please enter name");
         String name = readUntilSuccess(field -> {
@@ -212,6 +232,11 @@ public class CommandReader {
         );
     }
 
+    /**
+     * reads coordinates from user
+     * @return coordinates
+     * @throws IOException
+     */
     private Coordinates readCoordinates() throws IOException {
         System.out.println("Please enter coordinate x");
         float x = readUntilSuccess(fieldAsString -> {
@@ -250,6 +275,11 @@ public class CommandReader {
 
     public static final DateTimeFormatter BIRTHDAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    /**
+     * reads group admin from user
+     * @return group admin
+     * @throws IOException
+     */
     private Person readGroupAdmin() throws IOException {
         System.out.println("Please enter admin name, leave empty to skip");
         String adminName = readUntilSuccess();
@@ -289,6 +319,11 @@ public class CommandReader {
         return new Person(adminName, adminBirthday, passportId, location);
     }
 
+    /**
+     * reads location from user
+     * @return location
+     * @throws IOException
+     */
     private Location readLocation() throws IOException {
         System.out.println("Please enter location x, leave empty to skip");
         Integer locationX = readUntilSuccess(fieldAsString -> {

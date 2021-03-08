@@ -7,6 +7,9 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * class responsible for reading/writing csv file
+ */
 class FileStorage {
     public static Set<StudyGroup> readCSV(String filename) throws IOException, CsvValidationException {
         LinkedHashSet<StudyGroup> set = new LinkedHashSet<>();
