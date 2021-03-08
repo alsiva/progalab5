@@ -26,7 +26,7 @@ class FileStorage {
             int y = Integer.parseInt(line[3]);
             Coordinates coordinates = new Coordinates(x, y);
 
-            java.util.Date creationDate = new java.util.Date(); // todo: check format
+            java.util.Date creationDate = new java.util.Date();
 
             int studentCount = Integer.parseInt(line[5]);
             FormOfEducation formOfEducation = FormOfEducation.valueOf(line[6]);
