@@ -1,3 +1,4 @@
+execute_script script.txt
 show
 info
 add

@@ -4,6 +4,8 @@ import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,8 +13,10 @@ import java.util.Set;
  * class responsible for reading/writing csv file
  */
 class FileStorage {
-    public static Set<StudyGroup> readCSV(String filename) throws IOException, CsvValidationException {
+    public Set<StudyGroup> readCSV(String filename) throws IOException, CsvValidationException {
+
         LinkedHashSet<StudyGroup> set = new LinkedHashSet<>();
+        Set<Long> alreadyAddedIds = new HashSet<>();
 
         CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(filename)));
         reader.skip(1); // skip line with header
@@ -20,6 +24,13 @@ class FileStorage {
         String[] line;
         while ((line = reader.readNext()) != null) {
             long id = Long.parseLong(line[0]);
+
+            //check if there are elements in collection with the same id
+            if (!alreadyAddedIds.add(id)) {
+                System.err.println("Повторяющиеся id");
+                System.exit(1);
+            }
+
             String name = line[1];
 
             float x = Float.parseFloat(line[2]);
@@ -61,7 +72,7 @@ class FileStorage {
         return set;
     }
 
-    public static void writeCsv(Set<StudyGroup> set, String filename) {
+    public void writeCsv(Set<StudyGroup> set, String filename) {
         try {
             CSVWriter writer = new CSVWriter(new PrintWriter(filename));
 
