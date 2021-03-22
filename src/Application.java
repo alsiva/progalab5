@@ -9,6 +9,9 @@ import java.util.*;
  */
 public class Application {
     public static void main(String[] args) throws IOException {
+
+        final FileStorage fileStorage = new FileStorage();//чот я не уверен что это хорошо выглядит
+
         if (args.length == 0) {
             System.err.println("Please specify input file name as program argument");
             return;
@@ -18,7 +21,7 @@ public class Application {
 
         Set<StudyGroup> set;
         try {
-            set = FileStorage.readCSV(filename);
+            set = fileStorage.readCSV(filename);
         } catch (FileNotFoundException e) {
             System.err.println("File " + filename + " not found (" + e.getMessage() + ")");
             return;
@@ -33,6 +36,6 @@ public class Application {
         Administration administration = new Administration(set);
 
         BufferedReader stdinReader = new BufferedReader(new InputStreamReader(System.in));
-        new CommandReader(administration, stdinReader).readCommands();
+        new CommandReader(administration, stdinReader, fileStorage, "").readCommands();
     }
 }

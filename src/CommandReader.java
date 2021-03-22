@@ -9,12 +9,16 @@ import java.util.*;
  */
 public class CommandReader {
     private final Administration administration;
+    private final FileStorage fileStorage;
+    private final String thisFileName;
     private final BufferedReader in;
     private final Queue<String> lastCommands = new LinkedList<>();
 
-    public CommandReader(Administration administration, BufferedReader in) {
+    public CommandReader(Administration administration, BufferedReader in, FileStorage fileStorage, String thisFileName) {
         this.administration = administration;
         this.in = in;
+        this.fileStorage = fileStorage;
+        this.thisFileName = thisFileName;
     }
 
     /**
@@ -51,7 +55,6 @@ public class CommandReader {
                     continue;
                 }
 
-                // is there an element in set with given id?
                 boolean hasElement = administration.hasElementWithId(id);
                 if (!hasElement) {
                     System.err.println("No element with id: " + id);
@@ -76,13 +79,18 @@ public class CommandReader {
 
             } else if (command.startsWith("save ")) {
                 String fileName = command.substring("save ".length()).trim();
-                FileStorage.writeCsv(administration.getGroups(), fileName);
+                fileStorage.writeCsv(administration.getGroups(), fileName);
 
             } else if (command.startsWith("execute_script ")) {
                 String fileName = command.substring("execute_script ".length()).trim();
 
+                if (fileName.equals(thisFileName)) {
+                    System.err.println("Вызов скриптом самого себя");
+                    System.exit(1);
+                }
                 BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
-                new CommandReader(administration, fileReader).readCommands();
+
+                new CommandReader(administration, fileReader, fileStorage, fileName).readCommands();
 
             } else if (command.equals("add_if_min")) {
                 administration.addIfMin(readStudyGroup());
