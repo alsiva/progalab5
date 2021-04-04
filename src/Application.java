@@ -24,15 +24,12 @@ public class Application {
             set = fileStorage.readCSV(filename);
         } catch (FileNotFoundException e) {
             System.err.println("File " + filename + " not found (" + e.getMessage() + ")");
-            return;
         } catch (IOException e) {
             System.err.println("Error while reading from file: " + e.getMessage());
-            return;
         } catch (CsvValidationException e) {
             System.err.println("Failed to read file: " + e.getMessage());
-            return;
         } catch (FailedToParseException e) {
-            e.printStackTrace();
+            System.err.println("Failed to parse file: " + e.getMessage());
         }
 
         Administration administration = new Administration(set);

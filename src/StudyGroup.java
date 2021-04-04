@@ -105,6 +105,55 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return studentsCount.compareTo(other.studentsCount);
     }
 
+    public static long readId(String fieldAsString) throws FailedToParseException {
+        try {
+            return Long.parseLong(fieldAsString);
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read id: " + e.getMessage());
+        }
+    }
+
+    public static String readName(String fieldAsString) throws FailedToParseException {
+        if (fieldAsString.isEmpty()) {
+            throw new FailedToParseException("name could not be empty");
+        }
+        return fieldAsString;
+    }
+
+    public static int readStudentsCount(String fieldAsString) throws FailedToParseException {
+        int value;
+        try {
+            value = Integer.parseInt(fieldAsString);
+        } catch (NumberFormatException e) {
+            throw new FailedToParseException("Failed to read student count: " + e.getMessage());
+        }
+
+        if (value <= 0) {
+            throw new FailedToParseException("Students count should be greater than 0");
+        }
+
+        return value;
+    }
+
+    public static FormOfEducation readFormOfEducation(String fieldAsString) throws FailedToParseException {
+        FormOfEducation value;
+        try {
+            value = FormOfEducation.valueOf(fieldAsString);
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read form of education: " + e.getMessage());
+        }
+        return value;
+    }
+
+    public static Semester readSemester(String fieldAsString) throws FailedToParseException {
+        Semester value;
+        try {
+            value = Semester.valueOf(fieldAsString);
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read semester: " + e.getMessage());
+        }
+        return value;
+    }
 
 }
 

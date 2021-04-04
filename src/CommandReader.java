@@ -1,7 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 
 /**
@@ -26,7 +25,7 @@ public class CommandReader {
      * method that reads string commands from user or script
      */
     public void readCommands() throws IOException {
-        while(true) {
+        while (true) {
             System.out.println("Please enter command:");
             String command = in.readLine();
             if (command == null) {
@@ -151,9 +150,8 @@ public class CommandReader {
     private static final Random rng = new Random();
 
     /**
-     * returns study group with random id
      * @return study group with random id
-     * @throws IOException
+     * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private StudyGroup readStudyGroup() throws IOException {
         long id = rng.nextLong(); // generate random id
@@ -161,39 +159,20 @@ public class CommandReader {
     }
 
     /**
-     * returns study group with defined id
-     * @param id
+     * @param id auto-generated id
      * @return study group with defined id
-     * @throws IOException
+     * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private StudyGroup readStudyGroup(long id) throws IOException {
         System.out.println("Please enter name");
-        String name = readUntilSuccess(field -> {
-            if (field.isEmpty()) {
-                throw new FailedToParseException("name could not be empty");
-            }
-            return field;
-        });
+        String name = readUntilSuccess(StudyGroup::readName);
 
         Coordinates coordinates = readCoordinates();
 
         Date creationDate = new Date(); // creation date is now
 
         System.out.println("Please enter students count");
-        int studentsCount = readUntilSuccess(fieldAsString -> {
-            int value;
-            try {
-                value = Integer.parseInt(fieldAsString);
-            } catch (NumberFormatException e) {
-                throw new FailedToParseException("Failed to read student count: " + e.getMessage());
-            }
-
-            if (value <= 0) {
-                throw new FailedToParseException("Students count should be greater than 0");
-            }
-
-            return value;
-        });
+        int studentsCount = readUntilSuccess(StudyGroup::readStudentsCount);
 
         List<String> forms = new ArrayList<>();
         for (FormOfEducation value : FormOfEducation.values()) {
@@ -201,30 +180,15 @@ public class CommandReader {
         }
 
         System.out.println("Please enter form of education (" + String.join(", ", forms) + "), leave empty to skip");
-        FormOfEducation formOfEducation = readUntilSuccess(fieldAsString -> {
-            FormOfEducation value;
-            try {
-                value = FormOfEducation.valueOf(fieldAsString);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read form of education: " + e.getMessage());
-            }
-            return value;
-        });
+        FormOfEducation formOfEducation = readUntilSuccess(StudyGroup::readFormOfEducation);
 
         List<String> semesters = new ArrayList<>();
         for (Semester semester : Semester.values()) {
             semesters.add(semester.toString());
         }
+
         System.out.println("Please enter semester (" + String.join(", ", semesters) + "), leave empty to skip");
-        Semester semester = readUntilSuccess(fieldAsString -> {
-            Semester value;
-            try {
-                value = Semester.valueOf(fieldAsString);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read semester: " + e.getMessage());
-            }
-            return value;
-        });
+        Semester semester = readUntilSuccess(StudyGroup::readSemester);
 
         Person groupAdmin = readGroupAdmin();
 
@@ -243,50 +207,24 @@ public class CommandReader {
     /**
      * reads coordinates from user
      * @return coordinates
-     * @throws IOException
+     * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private Coordinates readCoordinates() throws IOException {
         System.out.println("Please enter coordinate x");
-        float x = readUntilSuccess(fieldAsString -> {
-            float value;
-            try {
-                value = Float.parseFloat(fieldAsString);
-            } catch (NumberFormatException e) {
-                throw new FailedToParseException("Failed to read x: " + e.getMessage());
-            }
-
-            if (value <= -318) {
-                throw new FailedToParseException("x should be greater than 318");
-            }
-
-            return value;
-        });
+        float x = readUntilSuccess(Coordinates::readX);
 
         System.out.println("Please enter coordinate y");
-        int y = readUntilSuccess(fieldAsString -> {
-            int value;
-            try {
-                value = Integer.parseInt(fieldAsString);
-            } catch (NumberFormatException e) {
-                throw new FailedToParseException("Failed to read y: " + e.getMessage());
-            }
-
-            if (value > 870) {
-                throw new FailedToParseException("y should be less than 870");
-            }
-
-            return value;
-        });
+        int y = readUntilSuccess(Coordinates::readY);
 
         return new Coordinates(x, y);
     }
 
-    public static final DateTimeFormatter BIRTHDAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
     /**
      * reads group admin from user
      * @return group admin
-     * @throws IOException
+     * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private Person readGroupAdmin() throws IOException {
         System.out.println("Please enter admin name, leave empty to skip");
@@ -296,31 +234,10 @@ public class CommandReader {
         }
 
         System.out.println("Please enter admin birthday");
-        LocalDate adminBirthday = readUntilSuccess(fieldAsString -> {
-            LocalDate value;
-            try {
-                value = LocalDate.parse(fieldAsString, BIRTHDAY_FORMATTER);
-            } catch (DateTimeParseException e) {
-                throw new FailedToParseException("Failed to read admin birthday: " + e.getMessage());
-            }
-            return value;
-        });
+        LocalDate adminBirthday = readUntilSuccess(Person::readAdminBirthday);
 
         System.out.println("Please enter passport id");
-        String passportId = readUntilSuccess(fieldAsString -> {
-            String value;
-            try {
-                value = fieldAsString;
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read passport id: " + e.getMessage());
-            }
-
-            if (value.length() < 7) {
-                throw new FailedToParseException("Passport id length should be greater than 7");
-            }
-
-            return value;
-        });
+        String passportId = readUntilSuccess(Person::readPassportID);
 
         Location location = readLocation();
 
@@ -330,49 +247,21 @@ public class CommandReader {
     /**
      * reads location from user
      * @return location
-     * @throws IOException
+     * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private Location readLocation() throws IOException {
         System.out.println("Please enter location x, leave empty to skip");
-        Integer locationX = readUntilSuccess(fieldAsString -> {
-            if (fieldAsString.isEmpty()) {
-                return null;
-            }
-
-            int value;
-            try {
-                value = Integer.parseInt(fieldAsString);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read location x: " + e.getMessage());
-            }
-            return value;
-        });
+        Integer locationX = readUntilSuccess(Location::readX);
 
         if (locationX == null) {
             return null;
         }
 
         System.out.println("Please enter location y");
-        int locationY = readUntilSuccess(fieldAsString -> {
-            int value;
-            try {
-                value = Integer.parseInt(fieldAsString);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read location y: " + e.getMessage());
-            }
-            return value;
-        });
+        int locationY = readUntilSuccess(Location::readY);
 
         System.out.println("Please enter location name");
-        String locationName = readUntilSuccess(fieldAsString -> {
-            String value;
-            try {
-                value = fieldAsString;
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read location name: " + e.getMessage());
-            }
-            return value;
-        });
+        String locationName = readUntilSuccess();
 
         return new Location(locationX, locationY, locationName);
     }
@@ -391,6 +280,8 @@ public class CommandReader {
     private String readUntilSuccess() throws IOException {
         return readUntilSuccess(str -> str);
     }
+
+    public static final DateTimeFormatter BIRTHDAY_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private static final String HELP_CONTENTS = "" +
             "help : вывести справку по доступным командам\n" +

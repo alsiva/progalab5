@@ -22,88 +22,29 @@ class FileStorage {
 
         String[] line;
         while ((line = reader.readNext()) != null) {
-
-            long id;
-            try {
-                id = Long.parseLong(line[0]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read id: " + e.getMessage());
-            }
-
+            long id = StudyGroup.readId(line[0]);
 
             if (!alreadyAddedIds.add(id)) {
-                System.err.println("Повторяющиеся id");
-                System.exit(1);
+                System.err.println("id " + id + " already exists; skipping");
+                continue;
             }
 
-            String name = line[1];
+            String name = StudyGroup.readName(line[1]);
 
-            float x;
-            try {
-               x = Float.parseFloat(line[2]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read x: " + e.getMessage());
-            }
+            float x = Coordinates.readX(line[2]);
+            int y = Coordinates.readY(line[3]);
 
-            int y;
-            try {
-                y = Integer.parseInt(line[3]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read y: " + e.getMessage());
-            }
             Coordinates coordinates = new Coordinates(x, y);
 
             java.util.Date creationDate = new java.util.Date();
 
-            int studentCount;
-            try {
-                studentCount = Integer.parseInt(line[5]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read students count: " + e.getMessage());
-            }
+            int studentCount = StudyGroup.readStudentsCount(line[5]);
 
-            FormOfEducation formOfEducation;
-            try {
-                formOfEducation = FormOfEducation.valueOf(line[6]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read formOfEducation: " + e.getMessage());
-            }
+            FormOfEducation formOfEducation = StudyGroup.readFormOfEducation(line[6]);
 
-            Semester semester;
-            try {
-                semester = Semester.valueOf(line[7]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read semester: " + e.getMessage());
-            }
+            Semester semester = StudyGroup.readSemester(line[7]);
 
-            String adminName = line[8];
-
-            LocalDate birthday;
-            try {
-                birthday = LocalDate.parse(line[9], CommandReader.BIRTHDAY_FORMATTER);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read birthday: " + e.getMessage());
-            }
-
-            String passportId = line[10];
-
-            int xi;
-            try {
-                xi = Integer.parseInt(line[11]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read x: " + e.getMessage());
-            }
-
-            Integer yi;
-            try {
-                yi = Integer.parseInt(line[12]);
-            } catch (IllegalArgumentException e) {
-                throw new FailedToParseException("Failed to read y: " + e.getMessage());
-            }
-            String locName = line[13];
-            Location location = new Location(xi, yi, locName);
-
-            Person groupAdmin = new Person(adminName, birthday, passportId, location);
+            Person groupAdmin = readGroupAdmin(line);
 
             StudyGroup studyGroup = new StudyGroup(
                     id,
@@ -120,6 +61,33 @@ class FileStorage {
         }
 
         return set;
+    }
+
+    private Person readGroupAdmin(String[] line) throws FailedToParseException {
+        String adminName = line[8];
+        if (adminName.isEmpty()) {
+            throw new FailedToParseException("admin name could not be null in a file");
+        }
+
+        LocalDate birthday = Person.readAdminBirthday(line[9]);
+
+        String passportId = Person.readPassportID(line[10]);
+        Location location = readLocation(line);
+
+        return new Person(adminName, birthday, passportId, location);
+    }
+
+    private Location readLocation(String[] line) throws FailedToParseException {
+        Integer adminLocationX = Location.readX(line[11]);
+        if (adminLocationX == null) {
+            throw new FailedToParseException("admin location x could not be skipped in file");
+        }
+
+        int adminLocationY = Location.readY(line[12]);
+
+        String locName = line[13];
+
+        return new Location(adminLocationX, adminLocationY, locName);
     }
 
     public void writeCsv(Set<StudyGroup> set, String filename) {

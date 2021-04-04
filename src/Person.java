@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 /**
  * class that defines person
@@ -42,5 +43,30 @@ public class Person {
      */
     public Location getLocation() {
         return location;
+    }
+
+    public static LocalDate readAdminBirthday(String fieldAsString) throws FailedToParseException {
+        LocalDate value;
+        try {
+            value = LocalDate.parse(fieldAsString, CommandReader.BIRTHDAY_FORMATTER);
+        } catch (DateTimeParseException e) {
+            throw new FailedToParseException("Failed to read admin birthday: " + e.getMessage());
+        }
+        return value;
+    }
+
+    public static String readPassportID(String fieldAsString) throws FailedToParseException {
+        String value;
+        try {
+            value = fieldAsString;
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read passport id: " + e.getMessage());
+        }
+
+        if (value.length() < 7) {
+            throw new FailedToParseException("Passport id length should be greater than 7");
+        }
+
+        return value;
     }
 }

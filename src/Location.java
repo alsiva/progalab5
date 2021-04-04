@@ -35,4 +35,28 @@ public class Location {
     public String getLocationName() {
         return locationName;
     }
+
+    public static Integer readX(String fieldAsString) throws FailedToParseException {
+        if (fieldAsString.isEmpty()) {
+            return null;
+        }
+
+        int value;
+        try {
+            value = Integer.parseInt(fieldAsString);
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read location x: " + e.getMessage());
+        }
+        return value;
+    }
+
+    public static int readY(String fieldAsString) throws FailedToParseException {
+        int value;
+        try {
+            value = Integer.parseInt(fieldAsString);
+        } catch (IllegalArgumentException e) {
+            throw new FailedToParseException("Failed to read location y: " + e.getMessage());
+        }
+        return value;
+    }
 }
