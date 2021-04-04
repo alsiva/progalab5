@@ -4,47 +4,96 @@ import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * class responsible for reading/writing csv file
  */
 class FileStorage {
+    protected Map<CSVField, Integer> headers = new HashMap<>();
+
+    class LineEntry {
+        private final String[] line;
+
+        LineEntry(String[] line) {
+            this.line = line;
+        }
+
+        public String readField(CSVField field) {
+            Integer i = headers.get(field);
+            if (i == null) {
+                throw new IllegalArgumentException("Field " + field + " does not exits");
+            }
+
+            return line[i];
+        }
+    }
+
+    private LineEntry readLineEntry(CSVReader reader) throws IOException, CsvValidationException {
+        String[] line = reader.readNext();
+        if (line == null) {
+            return null;
+        }
+
+        return new LineEntry(line);
+    }
+
+    private Map<CSVField, Integer> readHeaders(CSVReader reader) throws IOException, CsvValidationException {
+        Map<CSVField, Integer> headers = new HashMap<>();
+
+        // reading the header
+        String[] line = reader.readNext();
+        for (int i = 0; i < line.length; i++) {
+            String fieldName = line[i];
+            CSVField field = CSVField.getFieldByName(fieldName);
+            if (field == null) {
+                throw new IllegalArgumentException("unknown field: " + fieldName);
+            }
+
+            headers.put(field, i);
+        }
+
+        if (headers.size() != CSVField.values().length) {
+            throw new IllegalArgumentException("not all fields are presented in csv file");
+        }
+
+        return headers;
+    }
+
     public Set<StudyGroup> readCSV(String filename) throws IOException, CsvValidationException, FailedToParseException {
 
         LinkedHashSet<StudyGroup> set = new LinkedHashSet<>();
         Set<Long> alreadyAddedIds = new HashSet<>();
 
         CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(filename)));
-        reader.skip(1); // skip line with header
 
-        String[] line;
-        while ((line = reader.readNext()) != null) {
-            long id = StudyGroup.readId(line[0]);
+        headers = readHeaders(reader);
+
+        LineEntry lineEntry;
+        while ((lineEntry = readLineEntry(reader)) != null) {
+            long id = StudyGroup.readId(lineEntry.readField(CSVField.ID));
 
             if (!alreadyAddedIds.add(id)) {
                 System.err.println("id " + id + " already exists; skipping");
                 continue;
             }
 
-            String name = StudyGroup.readName(line[1]);
+            String name = StudyGroup.readName(lineEntry.readField(CSVField.NAME));
 
-            float x = Coordinates.readX(line[2]);
-            int y = Coordinates.readY(line[3]);
+            float x = Coordinates.readX(lineEntry.readField(CSVField.COORDINATE_X));
+            int y = Coordinates.readY(lineEntry.readField(CSVField.COORDINATE_Y));
 
             Coordinates coordinates = new Coordinates(x, y);
 
             java.util.Date creationDate = new java.util.Date();
 
-            int studentCount = StudyGroup.readStudentsCount(line[5]);
+            int studentCount = StudyGroup.readStudentsCount(lineEntry.readField(CSVField.STUDENTS_COUNT));
 
-            FormOfEducation formOfEducation = StudyGroup.readFormOfEducation(line[6]);
+            FormOfEducation formOfEducation = StudyGroup.readFormOfEducation(lineEntry.readField(CSVField.FORM_OF_EDUCATION));
 
-            Semester semester = StudyGroup.readSemester(line[7]);
+            Semester semester = StudyGroup.readSemester(lineEntry.readField(CSVField.SEMESTER));
 
-            Person groupAdmin = readGroupAdmin(line);
+            Person groupAdmin = readGroupAdmin(lineEntry);
 
             StudyGroup studyGroup = new StudyGroup(
                     id,
@@ -63,31 +112,48 @@ class FileStorage {
         return set;
     }
 
-    private Person readGroupAdmin(String[] line) throws FailedToParseException {
-        String adminName = line[8];
+    private Person readGroupAdmin(LineEntry lineEntry) throws FailedToParseException {
+        String adminName = lineEntry.readField(CSVField.GROUP_ADMIN_NAME);
         if (adminName.isEmpty()) {
             throw new FailedToParseException("admin name could not be null in a file");
         }
 
-        LocalDate birthday = Person.readAdminBirthday(line[9]);
+        LocalDate birthday = Person.readAdminBirthday(lineEntry.readField(CSVField.GROUP_ADMIN_BIRTHDAY));
 
-        String passportId = Person.readPassportID(line[10]);
-        Location location = readLocation(line);
+        String passportId = Person.readPassportID(lineEntry.readField(CSVField.GROUP_ADMIN_PASSPORT_ID));
+        Location location = readLocation(lineEntry);
 
         return new Person(adminName, birthday, passportId, location);
     }
 
-    private Location readLocation(String[] line) throws FailedToParseException {
-        Integer adminLocationX = Location.readX(line[11]);
+    private Location readLocation(LineEntry lineEntry) throws FailedToParseException {
+        Integer adminLocationX = Location.readX(lineEntry.readField(CSVField.GROUP_ADMIN_LOCATION_X));
         if (adminLocationX == null) {
             throw new FailedToParseException("admin location x could not be skipped in file");
         }
 
-        int adminLocationY = Location.readY(line[12]);
+        int adminLocationY = Location.readY(lineEntry.readField(CSVField.GROUP_ADMIN_LOCATION_Y));
 
-        String locName = line[13];
+        String locName = lineEntry.readField(CSVField.GROUP_ADMIN_LOCATION_NAME);
 
         return new Location(adminLocationX, adminLocationY, locName);
+    }
+
+    class LineWriter {
+        private final String[] line = new String[CSVField.values().length];
+
+        void writeField(CSVField field, String fieldValue) {
+            Integer i = headers.get(field);
+            if (i == null) {
+                throw new IllegalArgumentException("Field " + field + " does not exits");
+            }
+
+            line[i] = fieldValue;
+        }
+
+        public String[] getLine() {
+            return line;
+        }
     }
 
     public void writeCsv(Set<StudyGroup> set, String filename) {
@@ -95,52 +161,51 @@ class FileStorage {
             CSVWriter writer = new CSVWriter(new PrintWriter(filename));
 
             for (StudyGroup studyGroup: set) {
-                String[] line = new String[15];
+                LineWriter lineWriter = new LineWriter();
 
-                line[0] = studyGroup.getId().toString();
-                line[1] = studyGroup.getName();
+                lineWriter.writeField(CSVField.ID, studyGroup.getId().toString());
+                lineWriter.writeField(CSVField.NAME, studyGroup.getName());
 
                 Coordinates coordinates = studyGroup.getCoordinates();
                 float x = coordinates.getX();
                 int y = coordinates.getY();
-                line[2] = Float.toString(x);
-                line[3] = Integer.toString(y);
+                lineWriter.writeField(CSVField.COORDINATE_X, Float.toString(x));
+                lineWriter.writeField(CSVField.COORDINATE_Y, Integer.toString(y));
 
                 java.util.Date creationDate = studyGroup.getCreationDate();
                 String creationDateAsStr = creationDate.toString();
-                line[4] = creationDateAsStr;
+                lineWriter.writeField(CSVField.CREATION_DATE, creationDateAsStr);
 
                 int studentsCount = studyGroup.getStudentsCount();
-                line[5] = Integer.toString(studentsCount);
+                lineWriter.writeField(CSVField.STUDENTS_COUNT, Integer.toString(studentsCount));
 
                 FormOfEducation formOfEducation = studyGroup.getFormOfEducation();
-                line[6] = formOfEducation.toString();
+                lineWriter.writeField(CSVField.FORM_OF_EDUCATION, formOfEducation.toString());
 
                 Semester semester = studyGroup.getSemesterEnum();
-                line[7] = semester.toString();
+                lineWriter.writeField(CSVField.SEMESTER, semester.toString());
 
                 Person admin = studyGroup.getGroupAdmin();
                 String adminName = admin.getName();
-                line[8] = adminName;
+                lineWriter.writeField(CSVField.GROUP_ADMIN_NAME, adminName);
 
-                line[9] = admin.getBirthday().format(CommandReader.BIRTHDAY_FORMATTER);
+                lineWriter.writeField(CSVField.GROUP_ADMIN_BIRTHDAY, admin.getBirthday().format(CommandReader.BIRTHDAY_FORMATTER));
 
                 String passportID = admin.getPassportID();
-                line[10] = passportID;
+                lineWriter.writeField(CSVField.GROUP_ADMIN_PASSPORT_ID, passportID);
 
                 Location location = admin.getLocation();
-                line[11] = location.toString();
 
                 int xL = location.getX();
-                line[12] = Integer.toString(xL);
+                lineWriter.writeField(CSVField.GROUP_ADMIN_LOCATION_X, Integer.toString(xL));
 
                 int yL = location.getY();
-                line[13] = Integer.toString(yL);
+                lineWriter.writeField(CSVField.GROUP_ADMIN_LOCATION_Y, Integer.toString(yL));
 
                 String locName = location.getLocationName();
-                line[14] = locName;
+                lineWriter.writeField(CSVField.GROUP_ADMIN_LOCATION_NAME, locName);
 
-                writer.writeNext(line);
+                writer.writeNext(lineWriter.getLine());
             }
 
             writer.close();
