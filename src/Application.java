@@ -10,7 +10,7 @@ import java.util.*;
 public class Application {
     public static void main(String[] args) throws IOException {
 
-        final FileStorage fileStorage = new FileStorage();//чот я не уверен что это хорошо выглядит
+        final FileStorage fileStorage = new FileStorage();
 
         if (args.length == 0) {
             System.err.println("Please specify input file name as program argument");
@@ -19,7 +19,7 @@ public class Application {
 
         String filename = args[0];
 
-        Set<StudyGroup> set;
+        Set<StudyGroup> set = new LinkedHashSet<>();
         try {
             set = fileStorage.readCSV(filename);
         } catch (FileNotFoundException e) {
@@ -31,6 +31,8 @@ public class Application {
         } catch (CsvValidationException e) {
             System.err.println("Failed to read file: " + e.getMessage());
             return;
+        } catch (FailedToParseException e) {
+            e.printStackTrace();
         }
 
         Administration administration = new Administration(set);
