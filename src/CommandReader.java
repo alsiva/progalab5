@@ -20,6 +20,23 @@ public class CommandReader {
         this.thisFileName = thisFileName;
     }
 
+    private static final String HELP = "help";
+    private static final String INFO = "info";
+    private static final String SHOW = "show";
+    private static final String ADD = "add";
+    private final static String UPDATE = "update";
+    private final static String REMOVE_BY_ID = "remove_by_id";
+    private static final String CLEAR = "clear";
+    private static final String SAVE = "save";
+    private static final String EXECUTE_SCRIPT = "execute_script";
+    private static final String ADD_IF_MIN = "add_if_min";
+    private static final String REMOVE_LOWER = "remove_lower";
+    private static final String HISTORY = "history";
+    private static final String REMOVE_ALL_BY_STUDENTS_COUNT = "remove_all_by_students_count";
+    private static final String COUNT_BY_GROUP_ADMIN = "count_by_group_admin";
+    private static final String FILTER_LESS_THAN_SEMESTER_ENUM = "filter_less_than_semester_enum";
+    private static final String EXIT = "exit";
+
     /**
      * @throws IOException
      * method that reads string commands from user or script
@@ -32,20 +49,20 @@ public class CommandReader {
                 break;
             }
 
-            if (command.equals("help")) {
+            if (command.equals(HELP)) {
                 System.out.println(HELP_CONTENTS);
 
-            } else if (command.equals("info")) {
+            } else if (command.equals(INFO)) {
                 administration.info();
 
-            } else if (command.equals("show")) {
+            } else if (command.equals(SHOW)) {
                 administration.show();
 
-            } else if (command.equals("add")) {
+            } else if (command.equals(ADD)) {
                 administration.add(readStudyGroup());
 
-            } else if (command.startsWith("update")) {
-                String idAsStr = command.substring("update".length()).trim();
+            } else if (command.startsWith(UPDATE)) {
+                String idAsStr = command.substring(UPDATE.length()).trim();
                 long id;
                 try {
                     id = Long.parseLong(idAsStr);
@@ -62,8 +79,8 @@ public class CommandReader {
 
                 administration.updateId(readStudyGroup(id));
 
-            } else if (command.startsWith("remove_by_id")) {
-                String idAsStr = command.substring("remove_by_id".length()).trim();
+            } else if (command.startsWith(REMOVE_BY_ID)) {
+                String idAsStr = command.substring(REMOVE_BY_ID.length()).trim();
                 long id;
                 try {
                     id = Long.parseLong(idAsStr);
@@ -73,19 +90,19 @@ public class CommandReader {
                 }
                 administration.removeById(id);
 
-            } else if (command.equals("clear")) {
+            } else if (command.equals(CLEAR)) {
                 administration.clear();
 
-            } else if (command.equals("save")) {
+            } else if (command.equals(SAVE)) {
                 fileStorage.writeCsv(administration.getGroups());
 
-            } else if (command.startsWith("execute_script")) {
-                if (command.equals("execute_script")) {
+            } else if (command.startsWith(EXECUTE_SCRIPT)) {
+                if (command.equals(EXECUTE_SCRIPT)) {
                     System.err.println("filename is missing");
                     continue;
                 }
 
-                String fileName = command.substring("execute_script".length()).trim();
+                String fileName = command.substring(EXECUTE_SCRIPT.length()).trim();
 
                 if (fileName.equals(thisFileName)) {
                     System.err.println("script executes itself");
@@ -103,18 +120,18 @@ public class CommandReader {
 
                 new CommandReader(administration, fileReader, fileStorage, fileName).readCommands();
 
-            } else if (command.equals("add_if_min")) {
+            } else if (command.equals(ADD_IF_MIN)) {
                 administration.addIfMin(readStudyGroup());
 
-            } else if (command.equals("remove_lower")) {
+            } else if (command.equals(REMOVE_LOWER)) {
                 administration.removeLower(readStudyGroup());
 
-            } else if (command.equals("history")) {
+            } else if (command.equals(HISTORY)) {
                 for (String lastCommand : lastCommands) {
                     System.out.println(lastCommand);
                 }
-            } else if (command.startsWith("remove_all_by_students_count")) {
-                String countAsStr = command.substring("remove_all_by_students_count".length()).trim();
+            } else if (command.startsWith(REMOVE_ALL_BY_STUDENTS_COUNT)) {
+                String countAsStr = command.substring(REMOVE_ALL_BY_STUDENTS_COUNT.length()).trim();
                 long count;
                 try {
                     count = Long.parseLong(countAsStr);
@@ -124,7 +141,7 @@ public class CommandReader {
                 }
                 administration.removeAllByStudentsCount(count);
 
-            } else if (command.equals("count_by_group_admin")) {
+            } else if (command.equals(COUNT_BY_GROUP_ADMIN)) {
                 Person groupAdmin = readGroupAdmin();
                 if (groupAdmin == null) {
                     System.err.println("Illegal argument for count_by_group_admin: admin should not be null");
@@ -133,8 +150,8 @@ public class CommandReader {
                 int count = administration.countByGroupAdmin(groupAdmin);
                 System.out.println("total elements with given group admin: " + count);
 
-            } else if (command.startsWith("filter_less_than_semester_enum")) {
-                String semesterAsString = command.substring("filter_less_than_semester_enum".length()).trim();
+            } else if (command.startsWith(FILTER_LESS_THAN_SEMESTER_ENUM)) {
+                String semesterAsString = command.substring(FILTER_LESS_THAN_SEMESTER_ENUM.length()).trim();
 
                 Semester semester;
                 try {
@@ -145,7 +162,7 @@ public class CommandReader {
                 }
                 administration.filterLessThanSemesterEnum(semester);
 
-            } else if (command.equals("exit")) {
+            } else if (command.equals(EXIT)) {
                 break;
 
             } else {
