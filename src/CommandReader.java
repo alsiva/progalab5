@@ -183,7 +183,17 @@ public class CommandReader {
      * @throws IOException if readUntilSuccess fails to read from standard input
      */
     private StudyGroup readStudyGroup() throws IOException {
-        long id = rng.nextLong(); // generate random id
+        Set<Long> existingIds = new HashSet<>();
+
+        for (StudyGroup studyGroup: administration.getGroups()) {
+            existingIds.add(studyGroup.getId());
+        }
+
+        long id;
+        do {
+            id = rng.nextLong();
+        } while (existingIds.contains(id));
+
         return readStudyGroup(id);
     }
 
