@@ -44,8 +44,8 @@ public class CommandReader {
             } else if (command.equals("add")) {
                 administration.add(readStudyGroup());
 
-            } else if (command.startsWith("update ")) {
-                String idAsStr = command.substring("update ".length()).trim();
+            } else if (command.startsWith("update")) {
+                String idAsStr = command.substring("update".length()).trim();
                 long id;
                 try {
                     id = Long.parseLong(idAsStr);
@@ -79,13 +79,26 @@ public class CommandReader {
             } else if (command.equals("save")) {
                 fileStorage.writeCsv(administration.getGroups());
 
-            } else if (command.startsWith("execute_script ")) {
-                String fileName = command.substring("execute_script ".length()).trim();
+            } else if (command.startsWith("execute_script")) {
+                if (command.equals("execute_script")) {
+                    System.err.println("filename is missing");
+                    continue;
+                }
+
+                String fileName = command.substring("execute_script".length()).trim();
 
                 if (fileName.equals(thisFileName)) {
-                    System.err.println("Вызов скриптом самого себя");
-                    System.exit(1);
+                    System.err.println("script executes itself");
+                    return;
                 }
+
+                File file = new File(fileName);
+
+                if (!file.exists()) {
+                    System.err.println("file doesn't exist");
+                    continue;
+                }
+
                 BufferedReader fileReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
 
                 new CommandReader(administration, fileReader, fileStorage, fileName).readCommands();
@@ -100,8 +113,8 @@ public class CommandReader {
                 for (String lastCommand : lastCommands) {
                     System.out.println(lastCommand);
                 }
-            } else if (command.startsWith("remove_all_by_students_count ")) {
-                String countAsStr = command.substring("remove_all_by_students_count ".length()).trim();
+            } else if (command.startsWith("remove_all_by_students_count")) {
+                String countAsStr = command.substring("remove_all_by_students_count".length()).trim();
                 long count;
                 try {
                     count = Long.parseLong(countAsStr);
@@ -120,8 +133,8 @@ public class CommandReader {
                 int count = administration.countByGroupAdmin(groupAdmin);
                 System.out.println("total elements with given group admin: " + count);
 
-            } else if (command.startsWith("filter_less_than_semester_enum ")) {
-                String semesterAsString = command.substring("filter_less_than_semester_enum ".length()).trim();
+            } else if (command.startsWith("filter_less_than_semester_enum")) {
+                String semesterAsString = command.substring("filter_less_than_semester_enum".length()).trim();
 
                 Semester semester;
                 try {
