@@ -12,13 +12,23 @@ import java.util.Set;
  * class responsible for reading/writing csv file
  */
 class FileStorage {
-    public Set<StudyGroup> readCSV(String filename) throws IOException, CsvValidationException, FailedToParseException {
+    private final String filename;
+    private String[] headerLine;
 
+    public FileStorage(String filename) {
+        this.filename = filename;
+    }
+
+    public Set<StudyGroup> readCSV() throws IOException, CsvValidationException, FailedToParseException {
         LinkedHashSet<StudyGroup> set = new LinkedHashSet<>();
         Set<Long> alreadyAddedIds = new HashSet<>();
 
         CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(filename)));
-        reader.skip(1); // skip line with header
+        headerLine = reader.readNext();
+        if (headerLine == null) {
+            // empty file
+            return set;
+        }
 
         String[] line;
         while ((line = reader.readNext()) != null) {
@@ -36,7 +46,7 @@ class FileStorage {
 
             Coordinates coordinates = new Coordinates(x, y);
 
-            java.util.Date creationDate = new java.util.Date();
+            java.util.Date creationDate = StudyGroup.readCreationDate(line[4]);
 
             int studentCount = StudyGroup.readStudentsCount(line[5]);
 
@@ -90,12 +100,16 @@ class FileStorage {
         return new Location(adminLocationX, adminLocationY, locName);
     }
 
-    public void writeCsv(Set<StudyGroup> set, String filename) {
+    public void writeCsv(Set<StudyGroup> set) {
         try {
             CSVWriter writer = new CSVWriter(new PrintWriter(filename));
 
+            if (headerLine != null) {
+                writer.writeNext(headerLine, false);
+            }
+
             for (StudyGroup studyGroup: set) {
-                String[] line = new String[15];
+                String[] line = new String[14];
 
                 line[0] = studyGroup.getId().toString();
                 line[1] = studyGroup.getName();
@@ -107,8 +121,7 @@ class FileStorage {
                 line[3] = Integer.toString(y);
 
                 java.util.Date creationDate = studyGroup.getCreationDate();
-                String creationDateAsStr = creationDate.toString();
-                line[4] = creationDateAsStr;
+                line[4] = Long.toString(creationDate.getTime());
 
                 int studentsCount = studyGroup.getStudentsCount();
                 line[5] = Integer.toString(studentsCount);
@@ -129,18 +142,17 @@ class FileStorage {
                 line[10] = passportID;
 
                 Location location = admin.getLocation();
-                line[11] = location.toString();
 
                 int xL = location.getX();
-                line[12] = Integer.toString(xL);
+                line[11] = Integer.toString(xL);
 
                 int yL = location.getY();
-                line[13] = Integer.toString(yL);
+                line[12] = Integer.toString(yL);
 
                 String locName = location.getLocationName();
-                line[14] = locName;
+                line[13] = locName;
 
-                writer.writeNext(line);
+                writer.writeNext(line, false);
             }
 
             writer.close();

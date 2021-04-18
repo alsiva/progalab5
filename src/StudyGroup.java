@@ -121,6 +121,14 @@ public class StudyGroup implements Comparable<StudyGroup> {
         return value;
     }
 
+    public static Date readCreationDate(String fieldAsString) throws FailedToParseException {
+        try {
+            return new Date(Long.parseLong(fieldAsString));
+        } catch (NumberFormatException e) {
+            throw new FailedToParseException("Failed to read creation date: " + e.getMessage());
+        }
+    }
+
     public static FormOfEducation readFormOfEducation(String fieldAsString) throws FailedToParseException {
         FormOfEducation value;
         try {

@@ -76,9 +76,8 @@ public class CommandReader {
             } else if (command.equals("clear")) {
                 administration.clear();
 
-            } else if (command.startsWith("save ")) {
-                String fileName = command.substring("save ".length()).trim();
-                fileStorage.writeCsv(administration.getGroups(), fileName);
+            } else if (command.equals("save")) {
+                fileStorage.writeCsv(administration.getGroups());
 
             } else if (command.startsWith("execute_script ")) {
                 String fileName = command.substring("execute_script ".length()).trim();
