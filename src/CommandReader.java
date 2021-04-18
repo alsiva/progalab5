@@ -144,7 +144,7 @@ public class CommandReader {
             } else if (command.equals(COUNT_BY_GROUP_ADMIN)) {
                 Person groupAdmin = readGroupAdmin();
                 if (groupAdmin == null) {
-                    System.err.println("Illegal argument for count_by_group_admin: admin should not be null");
+                    System.err.println("Illegal argument for " + COUNT_BY_GROUP_ADMIN + ": admin should not be null");
                     continue;
                 }
                 int count = administration.countByGroupAdmin(groupAdmin);

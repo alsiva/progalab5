@@ -26,7 +26,7 @@ public class Administration {
      */
     public void info() {
         System.out.println("Collection type: " + groups.getClass().toString());
-        System.out.println("Collection creation time: " + creationDate.toString());
+        System.out.println("Collection creation time: " + printRepresentation.toPrint(creationDate));
         System.out.println("Elements in collection: " + groups.size());
     }
 
@@ -55,7 +55,7 @@ public class Administration {
      * removes study group in collection by it's id
      * @param id
      */
-    public void  removeById(Long id) {
+    public void removeById(Long id) {
         groups.removeIf(studyGroup -> studyGroup.getId().equals(id));
     }
 
@@ -121,7 +121,7 @@ public class Administration {
     public void filterLessThanSemesterEnum(Semester semester) {
         for (StudyGroup studyGroup: groups) {
             if (studyGroup.getSemesterEnum().ordinal() < semester.ordinal()) {
-                System.out.println(studyGroup);
+                System.out.println(printRepresentation.toPrint(studyGroup));
             }
         }
     }

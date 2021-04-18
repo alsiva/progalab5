@@ -1,4 +1,6 @@
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -50,5 +52,10 @@ public class PrintRepresentation {
         "}";
     }
 
+    private final DateTimeFormatter instantFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .withZone( ZoneId.systemDefault() );
 
+    public String toPrint(Instant creationDate) {
+        return instantFormatter.format(creationDate);
+    }
 }

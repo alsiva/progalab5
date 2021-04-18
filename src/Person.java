@@ -1,5 +1,6 @@
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 /**
  * class that defines person
@@ -68,5 +69,18 @@ public class Person {
         }
 
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return adminName.equals(person.adminName) && birthday.equals(person.birthday) && Objects.equals(passportID, person.passportID) && Objects.equals(location, person.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(adminName, birthday, passportID, location);
     }
 }
