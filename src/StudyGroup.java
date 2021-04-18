@@ -33,20 +33,6 @@ public class StudyGroup implements Comparable<StudyGroup> {
         this.groupAdmin = groupAdmin;
     }
 
-    @Override
-    public String toString() {
-        return "StudyGroup{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", coordinates=" + coordinates +
-                ", creationDate=" + creationDate +
-                ", studentsCount=" + studentsCount +
-                ", formOfEducation=" + formOfEducation +
-                ", semesterEnum=" + semesterEnum +
-                ", groupAdmin=" + groupAdmin +
-                '}';
-    }
-
     /**
      *
      * @return id of group

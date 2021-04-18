@@ -7,6 +7,7 @@ import java.util.Set;
 public class Administration {
     private final Set<StudyGroup> groups;
     private final Instant creationDate = Instant.now();
+    private final PrintRepresentation printRepresentation = new PrintRepresentation();
 
     public Set<StudyGroup> getGroups() {
         return groups;
@@ -34,7 +35,7 @@ public class Administration {
      */
     public void show() {
         for (StudyGroup studyGroup : groups) {
-            System.out.println(studyGroup.toString());
+            System.out.println(printRepresentation.toPrint(studyGroup));
         }
     }
 
