@@ -8,6 +8,8 @@ public class PrintRepresentation {
     private final DateTimeFormatter BIRTHDAY_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     String toPrint(StudyGroup studyGroup) {
+        Person groupAdmin = studyGroup.getGroupAdmin();
+
         return "{" +
             "id=" + studyGroup.getId() +
             ", name='" + studyGroup.getName() + '\'' +
@@ -16,7 +18,7 @@ public class PrintRepresentation {
             ", studentsCount=" + studyGroup.getStudentsCount() +
             ", formOfEducation=" + studyGroup.getFormOfEducation() +
             ", semesterEnum=" + studyGroup.getSemesterEnum() +
-            ", groupAdmin=" + toPrint(studyGroup.getGroupAdmin()) +
+            (groupAdmin == null ? "" : ", groupAdmin=" + toPrint(groupAdmin)) +
         '}';
     }
 
@@ -29,11 +31,14 @@ public class PrintRepresentation {
     }
 
     String toPrint(Person person) {
+        Location location = person.getLocation();
+        String passportID = person.getPassportID();
+
         return "{" +
             "name=" + person.getName() +
             ", birthday=" + person.getBirthday().format(BIRTHDAY_DATE_FORMAT) +
-            ", passportId=" + person.getPassportID() +
-            ", location=" + toPrint(person.getLocation()) +
+            ", passportId=" + (passportID == null ? "empty" : passportID) +
+            ((location == null) ? "" : (", location=" + toPrint(location))) +
         "}";
     }
 
