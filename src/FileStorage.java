@@ -13,7 +13,7 @@ import java.util.Set;
  */
 class FileStorage {
     private final String filename;
-    private String[] headerLine;
+    private String[] headerLine = new String[] {"id","name","coordinate.x","coordinate.y","creationDate","studentsCount","formOfEducation","semesterEnum","groupAdmin.name","groupAdmin.birthday","groupAdmin.passportId","groupAdmin.location.x","groupAdmin.location.y","groupAdmin.location.name"};
 
     public FileStorage(String filename) {
         this.filename = filename;
