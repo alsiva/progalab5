@@ -133,24 +133,30 @@ class FileStorage {
                 line[7] = semester.toString();
 
                 Person admin = studyGroup.getGroupAdmin();
-                String adminName = admin.getName();
-                line[8] = adminName;
 
-                line[9] = admin.getBirthday().format(CommandReader.BIRTHDAY_FORMATTER);
+                if (admin != null) {
+                    String adminName = admin.getName();
+                    line[8] = adminName;
 
-                String passportID = admin.getPassportID();
-                line[10] = passportID;
+                    line[9] = admin.getBirthday().format(CommandReader.BIRTHDAY_FORMATTER);
 
-                Location location = admin.getLocation();
+                    String passportID = admin.getPassportID();
+                    line[10] = passportID;
 
-                int xL = location.getX();
-                line[11] = Integer.toString(xL);
+                    Location location = admin.getLocation();
 
-                int yL = location.getY();
-                line[12] = Integer.toString(yL);
+                    if (location != null) {
+                        int xL = location.getX();
+                        line[11] = Integer.toString(xL);
 
-                String locName = location.getLocationName();
-                line[13] = locName;
+                        int yL = location.getY();
+                        line[12] = Integer.toString(yL);
+
+                        String locName = location.getLocationName();
+                        line[13] = locName;
+                    }
+                }
+
 
                 writer.writeNext(line, false);
             }

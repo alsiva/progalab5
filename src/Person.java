@@ -76,7 +76,7 @@ public class Person {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return adminName.equals(person.adminName) && birthday.equals(person.birthday) && Objects.equals(passportID, person.passportID) && Objects.equals(location, person.location);
+        return adminName.equals(person.adminName) && birthday.equals(person.birthday) && Objects.equals(passportID, person.passportID) && Objects.equals(location.getLocationName(), person.location.getLocationName());
     }
 
     @Override
